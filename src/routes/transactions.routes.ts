@@ -4,7 +4,8 @@ import { getCustomRepository } from 'typeorm';
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
-// import ImportTransactionsService from '../services/ImportTransactionsService';
+import ImportTransactionsService from '../services/ImportTransactionsService';
+import upload from '../config/upload';
 
 const transactionsRouter = Router();
 
@@ -48,8 +49,17 @@ transactionsRouter.delete('/:id', async (request, response) => {
   return response.status(204).send();
 });
 
-// transactionsRouter.post('/import', async (request, response) => {
-//   // TODO
-// });
+transactionsRouter.post(
+  '/import',
+  upload.multer.single('file'),
+  async (request, response) => {
+    const fileName = request.file.filename;
+    const importTransactionsService = new ImportTransactionsService();
+    const transaction = await importTransactionsService.execute({
+      fileName,
+    });
+    response.json(transaction);
+  },
+);
 
 export default transactionsRouter;
